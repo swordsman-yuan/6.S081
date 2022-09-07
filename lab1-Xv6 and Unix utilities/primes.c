@@ -3,11 +3,12 @@
 #include "user/user.h"
 
 int 
-main(int argc, char* argv[]){
+main(int argc, char* argv[])
+{
     int PresentNum = 2;                 //  input number counting 
     int ParentPipeFd[2];                //  file descriptor used by pipe 
     int ChildPipeFd[2];                 //  file descriptor used by child's pipe
-    char HasNextStage = 1;              //  the pipeline has reached its ending or not
+    // char HasNextStage = 1;              //  the pipeline has reached its ending or not
 
 
     pipe(ParentPipeFd);                 // apply for a pipe
@@ -18,7 +19,7 @@ main(int argc, char* argv[]){
         ++PresentNum;
     }
 
-    while(HasNextStage)
+    while(1)
     {
         if(fork() == 0)                                 // child process
         {       
@@ -55,10 +56,7 @@ main(int argc, char* argv[]){
             close(ParentPipeFd[0]);                     // close the read side of parent's pipe
 
             if(ReadCounter == 1)                        // if only 1 number has been read from the pipe, this is the last stage
-            {
-                HasNextStage = 0;                       // jump out of loop
                 exit(0);
-            }
 
             ParentPipeFd[0] = ChildPipeFd[0];           // update the ParentPipeFd
             ParentPipeFd[1] = ChildPipeFd[1];                   
@@ -70,9 +68,9 @@ main(int argc, char* argv[]){
 
             /* wait until all the processes exit */
             wait(0);
-            HasNextStage = 0;
+            exit(0);
         }
     }
     // fprintf(1, "process %d exited normally\n", getpid());
-    exit(0);
+    
 }
